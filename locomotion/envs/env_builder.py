@@ -36,7 +36,7 @@ def build_regular_env(robot_class,
   sim_params.enable_rendering = enable_rendering
   sim_params.motor_control_mode = motor_control_mode
   sim_params.reset_time = 2
-  sim_params.num_action_repeat = 10
+  sim_params.num_action_repeat = 4
   sim_params.enable_action_interpolation = False
   sim_params.enable_action_filter = False
   sim_params.enable_clip_motor_commands = False

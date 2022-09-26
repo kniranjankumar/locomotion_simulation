@@ -42,7 +42,7 @@ MOTOR_NAMES = [
     "RL_lower_joint",
 ]
 INIT_RACK_POSITION = [0, 0, 1]
-INIT_POSITION = [0, 0, 0.32]
+INIT_POSITION = [0, 0, 0.42]
 JOINT_DIRECTIONS = np.ones(12)
 HIP_JOINT_OFFSET = 0.0
 UPPER_LEG_JOINT_OFFSET = 0.0
@@ -65,16 +65,17 @@ HIP_OFFSETS = np.array([[0.183, -0.047, 0.], [0.183, 0.047, 0.],
                         [-0.183, -0.047, 0.], [-0.183, 0.047, 0.]
                         ]) + COM_OFFSET
 
-ABDUCTION_P_GAIN = 100.0
-ABDUCTION_D_GAIN = 1.
-HIP_P_GAIN = 100.0
-HIP_D_GAIN = 2.0
-KNEE_P_GAIN = 100.0
-KNEE_D_GAIN = 2.0
+ABDUCTION_P_GAIN = 20.0
+ABDUCTION_D_GAIN = 0.5
+HIP_P_GAIN = 20.0
+HIP_D_GAIN = 0.5
+KNEE_P_GAIN = 20.0
+KNEE_D_GAIN = 0.5
 
 # Bases on the readings from Laikago's default pose.
-INIT_MOTOR_ANGLES = np.array([0, 0.9, -1.8] * NUM_LEGS)
-
+# INIT_MOTOR_ANGLES = np.array([0, 0.9, -1.8] * NUM_LEGS)
+INIT_MOTOR_ANGLES = np.array([ -0.1000,  0.8000, -1.5000, 0.1000,  0.8000, -1.5000, -0.1000,  1.0000, -1.5000,   0.1000,  1.0000,
+         -1.5000])
 HIP_NAME_PATTERN = re.compile(r"\w+_hip_\w+")
 UPPER_NAME_PATTERN = re.compile(r"\w+_upper_\w+")
 LOWER_NAME_PATTERN = re.compile(r"\w+_lower_\w+")
