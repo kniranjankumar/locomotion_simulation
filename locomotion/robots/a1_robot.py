@@ -28,7 +28,7 @@ from locomotion.robots import minitaur
 from locomotion.robots import robot_config
 from locomotion.envs import locomotion_gym_config
 from robot_interface import RobotInterface  # pytype: disable=import-error
-
+np.set_printoptions(precision=2)
 NUM_MOTORS = 12
 NUM_LEGS = 4
 MOTOR_NAMES = [
@@ -63,20 +63,37 @@ _DEFAULT_HIP_POSITIONS = (
     (-0.195, -0.135, 0),
     (-0.195, 0.13, 0),
 )
+# best
+# ABDUCTION_P_GAIN = 45.0
+# ABDUCTION_D_GAIN = 2.0
+# HIP_P_GAIN = 45.
+# HIP_D_GAIN = 3.5
+# KNEE_P_GAIN = 45.0
+# KNEE_D_GAIN = 3.5
 
-ABDUCTION_P_GAIN = 45.0
-ABDUCTION_D_GAIN = 2.0
-HIP_P_GAIN = 30.
-HIP_D_GAIN = 2.0
-KNEE_P_GAIN = 30.0
-KNEE_D_GAIN = 2.0
-
+#low gain
 # ABDUCTION_P_GAIN = 42.0
 # ABDUCTION_D_GAIN = 2.2
 # HIP_P_GAIN = 42.0
 # HIP_D_GAIN = 2.2
 # KNEE_P_GAIN = 42.0
 # KNEE_D_GAIN = 2.2
+
+#door opening
+# ABDUCTION_P_GAIN = 40.0
+# ABDUCTION_D_GAIN = 2.0
+# HIP_P_GAIN = 40.
+# HIP_D_GAIN = 2.0
+# KNEE_P_GAIN = 40.0
+# KNEE_D_GAIN = 2.0
+
+# push gain
+ABDUCTION_P_GAIN = 45.0
+ABDUCTION_D_GAIN = 1.5
+HIP_P_GAIN = 45.
+HIP_D_GAIN = 1.5
+KNEE_P_GAIN = 45.0
+KNEE_D_GAIN = 1.5
 
 COMMAND_CHANNEL_NAME = 'LCM_Low_Cmd'
 STATE_CHANNEL_NAME = 'LCM_Low_State'
@@ -183,6 +200,16 @@ class A1Robot(a1.A1):
     """
     state = self._robot_interface.receive_observation()
     self._raw_state = state
+    # print(np.array([motor.temperature for motor in state.motorState[:12]]))
+    # motor_mode = np.array([motor.mode for motor in state.motorState[:12]])
+    # if motor_mode[0] == 0:
+    # print(np.array([motor.tauEst for motor in state.motorState[:12]]))
+      
+    #   assert False
+    # print(np.array([motor.reserve for motor in state.motorState[:12]]))
+    # print(np.array([motor.tauEst for motor in state.motorState[:12]]))
+    
+    # print(state.udp)
     # Convert quaternion from wxyz to xyzw, which is default for Pybullet.
     q = state.imu.quaternion
     self._base_orientation = np.array([q[1], q[2], q[3], q[0]])

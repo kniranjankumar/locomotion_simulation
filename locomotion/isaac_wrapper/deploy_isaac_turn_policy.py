@@ -10,29 +10,43 @@ import torch
 from locomotion.robots import a1_robot, a1
 from locomotion.robots import robot_config
 from locomotion.isaac_wrapper.load_policy import *
+from client import Mocap
+
 FREQ = 0.5
 
 def get_projected_gravity(orientation, p):
-    orientation = np.array(orientation)
+    # orientation = np.array(orientation)
+    # orientation[-1] = -orientation[-1]
+    # return p.multiplyTransforms([0,0,0],orientation,[0,0,-1],[0,0,0,1])[0]
+  return quat_rotate_inverse(orientation,[0,0,-1],p)
+
+def quat_rotate_inverse(q,v,p):
+    orientation = np.array(q)
     orientation[-1] = -orientation[-1]
-    return p.multiplyTransforms([0,0,0],orientation,[0,0,-1],[0,0,0,1])[0]
+    return p.multiplyTransforms([0,0,0],orientation,v,[0,0,0,1])[0]
 
 def rearrange_joints(joint_obs):
   joint_obs = np.array(joint_obs)
   return np.concatenate([joint_obs[3:6],joint_obs[0:3],joint_obs[9:12],joint_obs[6:9]])
   
 def get_observation(robot,p,actions):
-    print(list(robot.GetBaseRollPitchYaw()))
+    # print(list(robot.GetBaseRollPitchYaw()))
     rpy = list(robot.GetBaseRollPitchYaw())
-    rpy[-1] = 0.0
-    
+    # rpy[-1] = 0.5
+    base_quat = p.getQuaternionFromEuler(rpy)
+    # print(list(robot.GetBaseRollPitchYawRate()))
+    # print(get_projected_gravity(pybullet.getQuaternionFromEuler(rpy),p))
     # print(robot.GetBaseOrientation(),)
-    base_motor_angle = np.array([ -0.1000,  0.8000, -1.5000, 0.1000,  0.8000, -1.5000, -0.1000,  1.0000, -1.5000,   0.1000,  1.0000,
-         -1.5000])  
-    obs = [np.array(robot.GetBaseVelocity())*2,
-     np.array(robot.GetBaseRollPitchYawRate())*0.25,
+    base_motor_angle = np.array([ -0.1000,  0.8000, -1.5000, 
+                                 0.1000,  0.8000, -1.5000, 
+                                 -0.1000,  1.0000, -1.5000,   
+                                 0.1000,  1.0000, -1.5000]) 
+    vel =  quat_rotate_inverse(base_quat, robot.GetBaseVelocity(), p)
+    ang_vel = quat_rotate_inverse(base_quat, robot.GetBaseRollPitchYawRate(), p)
+    obs = [np.array(vel)*2,
+     np.array(ang_vel)*0.25,
     #  np.array(get_projected_gravity(robot.GetBaseOrientation(),p)),
-    np.array(get_projected_gravity(pybullet.getQuaternionFromEuler(rpy),p)),
+    np.array(get_projected_gravity(base_quat,p)),
     #  np.array([-2.9,  0.1953]),
      rearrange_joints(robot.GetMotorAngles())- base_motor_angle,
      rearrange_joints(robot.GetMotorVelocities())*0.05,
@@ -85,7 +99,6 @@ def main(_):
   # for t in range(10):
   #   robot.Step(default_action, robot_config.MotorControlMode.POSITION)
   # current_motor_angle = np.array(robot.GetMotorAngles())
-  
   for t in range(200):
     robot.ReceiveObservation()
     current_motor_angle = np.array(robot.GetMotorAngles())
@@ -94,14 +107,17 @@ def main(_):
     robot.Step(blend_action, robot_config.MotorControlMode.POSITION)
 
     time.sleep(0.005)
-  
+  start_action =  np.array([ -0.0000,  0.8000, -1.5000, 
+                              0.0000,  0.8000, -1.5000, 
+                              -0.0000,  1.0000, -1.5000,   
+                              0.0000,  1.0000,-1.5000])  
   for t in range(1000):
       robot.ReceiveObservation()
-      robot.Step(default_action, robot_config.MotorControlMode.POSITION)
+      robot.Step(start_action, robot_config.MotorControlMode.POSITION)
       time.sleep(0.005)
     
     
-  for t in range(1000):
+  for t in range(2000):
     robot.ReceiveObservation()
     observation = torch.from_numpy(get_observation(robot,p,action)).to(torch.device('cuda'))
     # print(observation[:6])
